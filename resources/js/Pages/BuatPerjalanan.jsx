@@ -3,11 +3,16 @@ import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { useState } from "react";
 
+// Notes untuk backend:
+// - Buat API endpoint untuk mengambil data tempat kunjungan
+// - Data yang diambil: nama tempat, alamat, dan koordinat (latitude, longitude)
+// - Buat proses untuk mengolah data tempat kunjungan yang diinput user (implementasi algoritma TSP)
+// - Nanti hasil olahan data tempat kunjungan akan dijadikan rute perjalanan dan ditampilkan di ReviewPerjalanan Page
 export default function BuatPerjalanan() {
     const [searchQuery, setSearchQuery] = useState("");
-    const [filteredResults, setFilteredResults] = useState([]);
+    const [filteredResults, setFilteredResults] = useState([]); // Taro data hasil pencarian dari api disini
     const [tanggal, setTanggal] = useState("");
-    const [tempatKunjunganList, setTempatKunjunganList] = useState([]);
+    const [tempatKunjunganList, setTempatKunjunganList] = useState([]); // Variabel buat nampung daftar tempat kunjungan
 
     // Contoh data tempat kunjungan
     const dummyData = [
@@ -18,6 +23,7 @@ export default function BuatPerjalanan() {
         { nama: "Danau Toba", alamat: "Sumatera Utara" },
     ];
 
+    // Fungsi untuk memfilter hasil pencarian dan menampilkan di search dropdown
     const handleSearch = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
@@ -25,6 +31,7 @@ export default function BuatPerjalanan() {
         if (query.trim() === "") {
             setFilteredResults([]);
         } else {
+            // nanti disini query ke database atau API
             const results = dummyData.filter(
                 (tempat) =>
                     tempat.nama.toLowerCase().includes(query.toLowerCase()) ||
@@ -64,7 +71,7 @@ export default function BuatPerjalanan() {
                             type="text"
                             placeholder="Cari Destinasi yang Ingin Kamu Kunjungi"
                             className="w-full px-4 py-2 border border-gray-300 rounded"
-                            value={searchQuery}
+                            value={searchQuery} // Keyword pencarian buat query ke database atau API
                             onChange={handleSearch}
                         />
 
@@ -76,12 +83,12 @@ export default function BuatPerjalanan() {
                                         key={index}
                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                         onClick={() => {
-                                            setSearchQuery(tempat.nama);
-                                            setFilteredResults([]);
+                                            setSearchQuery(tempat.nama); // buat naro value di search bar
+                                            setFilteredResults([]); // buat reset fileteredResults
                                             setTempatKunjunganList([
                                                 ...tempatKunjunganList,
                                                 tempat,
-                                            ]);
+                                            ]); // tambahkan tempat ke array tempatKunjunganList
                                         }}
                                     >
                                         {tempat.nama} - {tempat.alamat}
