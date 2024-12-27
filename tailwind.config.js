@@ -16,6 +16,17 @@ export default {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
                 nunito: ['"Nunito Sans"', "sans-serif"],
             },
+            colors: {
+                // customBlue: "#1E40AF", // Custom color name and value
+                primary: {
+                    default: "#4D8E92",
+                    hover: "#3D7275",
+                    active: "#2E5759",
+                },
+                secondary: {
+                    default: "#B7F2F5",
+                },
+            },
         },
     },
 
