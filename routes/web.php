@@ -27,6 +27,28 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/api/trips', function () {
+    return response()->json([
+        [
+            'id' => 1,
+            'namaTempat' => 'Bali Trip',
+            'startDate' => '12 Jan',
+            'tripUrl' => '/trips/1',
+        ],
+        [
+            'id' => 2,
+            'namaTempat' => 'Lombok Adventure',
+            'startDate' => '20 Feb',
+            'tripUrl' => '/trips/2',
+        ],
+        [
+            'id' => 3,
+            'namaTempat' => 'Jakarta Getaway',
+            'startDate' => '5 Mar',
+            'tripUrl' => '/trips/3',
+        ],
+    ]);
+});
 
 Route::post('/get-optimized-route', [RouteController::class, 'getOptimizedRoute']);
 Route::post('/search', [GetgeocodingController::class, 'search']);
