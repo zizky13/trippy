@@ -2,6 +2,7 @@ export default function PrimaryButton({
     className = "",
     disabled,
     children,
+    onClick,
     ...props
 }) {
     return (
@@ -14,6 +15,7 @@ export default function PrimaryButton({
             }
             disabled={disabled}
             // style={{ backgroundColor: "#4D8E92" }}
+            onClick={onClick}
         >
             {children}
         </button>

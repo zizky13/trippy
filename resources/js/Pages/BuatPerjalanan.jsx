@@ -56,7 +56,7 @@ export default function BuatPerjalanan() {
                 </h1>
 
                 {/* Input Form */}
-                <div className="mb-8">
+                <div className="mb-8" aria-hidden="true">
                     {/* Input Search */}
                     <SearchBox
                         accessToken="pk.eyJ1Ijoieml6a3kxMyIsImEiOiJjbHk2cTJxb2UwYzV1MmtvbG85a2EzNjJhIn0.j9trVLB7KjGq70mruHsuRQ"
@@ -93,7 +93,14 @@ export default function BuatPerjalanan() {
 
                 {/* Tombol Konfirmasi */}
                 <div className="flex justify-center mt-8">
-                    <PrimaryButton>Konfirmasi Perjalanan Kamu</PrimaryButton>
+                    <PrimaryButton
+                        onClick={() => {
+                            // Nanti disini akan diarahkan ke halaman ReviewPerjalanan
+                            console.log("Konfirmasi Perjalanan");
+                        }}
+                    >
+                        Konfirmasi Perjalanan Kamu
+                    </PrimaryButton>
                 </div>
             </div>
         </AuthenticatedLayout>
