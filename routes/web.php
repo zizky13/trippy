@@ -27,6 +27,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/buatperjalanan', function () {
+    return Inertia::render('BuatPerjalanan');
+});
+Route::get('/reviewperjalanan', function () {
+    return Inertia::render('ReviewPerjalanan');
+});
+
 Route::get('/api/trips', function () {
     return response()->json([
         [
