@@ -1,6 +1,7 @@
 import PrimaryButton from "@/Components/PrimaryButton";
 import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { SearchBox } from "@mapbox/search-js-react";
 import { useState } from "react";
 
 // Notes untuk backend:
@@ -55,48 +56,24 @@ export default function BuatPerjalanan() {
                 </h1>
 
                 {/* Input Form */}
-                <div className="flex flex-col md:flex-row gap-4 mb-8">
-                    {/* Input Tanggal */}
-                    <input
-                        type="date"
-                        value={tanggal}
-                        onChange={(e) => setTanggal(e.target.value)}
-                        placeholder="Tanggal Berangkat"
-                        className="w-full px-4 py-2 border border-gray-300 rounded"
-                    />
-
+                <div className="mb-8">
                     {/* Input Search */}
-                    <div className="relative w-full">
-                        <input
-                            type="text"
-                            placeholder="Cari Destinasi yang Ingin Kamu Kunjungi"
-                            className="w-full px-4 py-2 border border-gray-300 rounded"
-                            value={searchQuery} // Keyword pencarian buat query ke database atau API
-                            onChange={handleSearch}
-                        />
-
-                        {/* Dropdown Recommendations */}
-                        {filteredResults.length > 0 && (
-                            <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow-lg mt-1">
-                                {filteredResults.map((tempat, index) => (
-                                    <li
-                                        key={index}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                        onClick={() => {
-                                            setSearchQuery(tempat.nama); // buat naro value di search bar
-                                            setFilteredResults([]); // buat reset fileteredResults
-                                            setTempatKunjunganList([
-                                                ...tempatKunjunganList,
-                                                tempat,
-                                            ]); // tambahkan tempat ke array tempatKunjunganList
-                                        }}
-                                    >
-                                        {tempat.nama} - {tempat.alamat}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
+                    <SearchBox
+                        accessToken="pk.eyJ1Ijoieml6a3kxMyIsImEiOiJjbHk2cTJxb2UwYzV1MmtvbG85a2EzNjJhIn0.j9trVLB7KjGq70mruHsuRQ"
+                        options={{
+                            language: "id",
+                        }}
+                        onRetrieve={(result) => {
+                            if (result.features && result.features.length > 0) {
+                                const properties = result.features.map(
+                                    (feature) => feature.properties
+                                );
+                                console.table(properties); // Mencetak dalam bentuk tabel
+                            } else {
+                                console.log("No results found.");
+                            }
+                        }}
+                    />
                 </div>
 
                 {/* Daftar Tempat Kunjungan */}
