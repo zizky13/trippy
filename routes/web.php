@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\GetgeocodingController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\RouteController;
+use App\Http\Controllers\MapboxController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -23,7 +26,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
 
 Route::get('/api/trips', function () {
     return response()->json([
@@ -47,4 +49,8 @@ Route::get('/api/trips', function () {
         ],
     ]);
 });
+
+Route::post('/get-optimized-route', [RouteController::class, 'getOptimizedRoute']);
+Route::post('/search', [GetgeocodingController::class, 'search']);
+
 require __DIR__.'/auth.php';
