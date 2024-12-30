@@ -63,6 +63,7 @@ export default function BuatPerjalanan() {
                         options={{
                             language: "id",
                         }}
+                        // Fungsi untuk menampilkan data hasil pencarian
                         onRetrieve={(result) => {
                             if (result.features && result.features.length > 0) {
                                 const properties = result.features.map(
