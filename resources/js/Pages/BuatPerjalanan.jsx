@@ -10,38 +10,11 @@ import { useState } from "react";
 // - Buat proses untuk mengolah data tempat kunjungan yang diinput user (implementasi algoritma TSP)
 // - Nanti hasil olahan data tempat kunjungan akan dijadikan rute perjalanan dan ditampilkan di ReviewPerjalanan Page
 export default function BuatPerjalanan() {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filteredResults, setFilteredResults] = useState([]); // Taro data hasil pencarian dari api disini
-    const [tanggal, setTanggal] = useState("");
     const [tempatKunjunganList, setTempatKunjunganList] = useState([]); // Variabel buat nampung daftar tempat kunjungan
+    const [koordinatList, setKoordinatList] = useState([]); // Variabel buat nampung daftar koordinat tempat kunjungan
 
-    // Contoh data tempat kunjungan
-    const dummyData = [
-        { nama: "Pantai Kuta", alamat: "Bali" },
-        { nama: "Candi Borobudur", alamat: "Magelang" },
-        { nama: "Gunung Bromo", alamat: "Jawa Timur" },
-        { nama: "Raja Ampat", alamat: "Papua" },
-        { nama: "Danau Toba", alamat: "Sumatera Utara" },
-    ];
-
-    // Fungsi untuk memfilter hasil pencarian dan menampilkan di search dropdown
-    const handleSearch = (e) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-
-        if (query.trim() === "") {
-            setFilteredResults([]);
-        } else {
-            // nanti disini query ke database atau API
-            const results = dummyData.filter(
-                (tempat) =>
-                    tempat.nama.toLowerCase().includes(query.toLowerCase()) ||
-                    tempat.alamat.toLowerCase().includes(query.toLowerCase())
-            );
-            setFilteredResults(results);
-        }
-    };
-
+    console.log(koordinatList);
+    console.log(tempatKunjunganList);
     return (
         <AuthenticatedLayout
             header={
@@ -66,12 +39,26 @@ export default function BuatPerjalanan() {
                         // Fungsi untuk menampilkan data hasil pencarian
                         onRetrieve={(result) => {
                             if (result.features && result.features.length > 0) {
-                                const properties = result.features.map(
-                                    (feature) => feature.properties
-                                );
-                                console.table(properties); // Mencetak dalam bentuk tabel
-                            } else {
-                                console.log("No results found.");
+                                const coordinates =
+                                    result.features[0].geometry.coordinates;
+                                setKoordinatList((prev) => [
+                                    ...prev,
+                                    {
+                                        long: coordinates[0],
+                                        lat: coordinates[1],
+                                    },
+                                ]);
+
+                                setTempatKunjunganList((prev) => [
+                                    ...prev,
+                                    {
+                                        nama: result.features[0].properties
+                                            .name,
+                                        alamat: result.features[0].properties
+                                            .place_formatted,
+                                        // hasil: result.features[0],
+                                    },
+                                ]);
                             }
                         }}
                     />
