@@ -2,26 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\MapboxService;
 use Illuminate\Http\Request;
-use App\Services\TSPService;
+use App\Http\Services\TSPService;
 
 class TSPController extends Controller
 {
     protected $tspService;
+    protected $mapboxService;
 
-    public function __construct(TSPService $tspService)
+    public function __construct(TSPService $tspService, MapboxService $mapboxService)
     {
         $this->tspService = $tspService;
+        $this->mapboxService = $mapboxService;
     }
 
     // Solve the TSP given the distance matrix
-    public function solveTSP(Request $request)
+    // Assumes request has data array of places to go, in the form of lat,lon
+    public function getOptimizedRoute(Request $request)
     {
-        $distances = $request->input('distances'); // Distance matrix array
-        $start = $request->input('start', 0); // Default to start at point 0
+        $coordinates = $request->input('coordinates'); // "lat1,lon1;lat2,lon2;lat3,lon3"
 
-        $route = $this->tspService->solveNearestNeighbor($distances, $start);
+        // Step 1: Get the distance matrix from Mapbox
+        $distanceMatrix = $this->mapboxService->generateDistanceMatrix($coordinates);
 
-        return response()->json($route);
+        // Step 2: Solve TSP with the distance matrix
+        $route = $this->tspService->solveTSP($distanceMatrix);
+
+        // Step 3: Return the final route
+        return response()->json([
+            'optimized_route' => $route
+        ]);
     }
 }
