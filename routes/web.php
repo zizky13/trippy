@@ -1,12 +1,10 @@
 <?php
 
-use App\Http\Controllers\GetgeocodingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TSPController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\RouteController;
-use App\Http\Controllers\MapboxController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -57,7 +55,6 @@ Route::get('/api/trips', function () {
     ]);
 });
 
-Route::post('/get-optimized-route', [RouteController::class, 'getOptimizedRoute']);
-Route::post('/search', [GetgeocodingController::class, 'search']);
+Route::get('/generateroute', [TSPController::class, 'getOptimizedRoute']);
 
 require __DIR__.'/auth.php';
