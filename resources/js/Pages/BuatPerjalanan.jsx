@@ -1,6 +1,7 @@
 import PrimaryButton from "@/Components/PrimaryButton";
 import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { SearchBox } from "@mapbox/search-js-react";
 import { useState } from "react";
 
 // Notes untuk backend:
@@ -9,38 +10,11 @@ import { useState } from "react";
 // - Buat proses untuk mengolah data tempat kunjungan yang diinput user (implementasi algoritma TSP)
 // - Nanti hasil olahan data tempat kunjungan akan dijadikan rute perjalanan dan ditampilkan di ReviewPerjalanan Page
 export default function BuatPerjalanan() {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filteredResults, setFilteredResults] = useState([]); // Taro data hasil pencarian dari api disini
-    const [tanggal, setTanggal] = useState("");
     const [tempatKunjunganList, setTempatKunjunganList] = useState([]); // Variabel buat nampung daftar tempat kunjungan
+    const [koordinatList, setKoordinatList] = useState(); // Variabel buat nampung daftar koordinat tempat kunjungan
 
-    // Contoh data tempat kunjungan
-    const dummyData = [
-        { nama: "Pantai Kuta", alamat: "Bali" },
-        { nama: "Candi Borobudur", alamat: "Magelang" },
-        { nama: "Gunung Bromo", alamat: "Jawa Timur" },
-        { nama: "Raja Ampat", alamat: "Papua" },
-        { nama: "Danau Toba", alamat: "Sumatera Utara" },
-    ];
-
-    // Fungsi untuk memfilter hasil pencarian dan menampilkan di search dropdown
-    const handleSearch = (e) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-
-        if (query.trim() === "") {
-            setFilteredResults([]);
-        } else {
-            // nanti disini query ke database atau API
-            const results = dummyData.filter(
-                (tempat) =>
-                    tempat.nama.toLowerCase().includes(query.toLowerCase()) ||
-                    tempat.alamat.toLowerCase().includes(query.toLowerCase())
-            );
-            setFilteredResults(results);
-        }
-    };
-
+    console.log(koordinatList);
+    console.log(tempatKunjunganList);
     return (
         <AuthenticatedLayout
             header={
@@ -55,48 +29,41 @@ export default function BuatPerjalanan() {
                 </h1>
 
                 {/* Input Form */}
-                <div className="flex flex-col md:flex-row gap-4 mb-8">
-                    {/* Input Tanggal */}
-                    <input
-                        type="date"
-                        value={tanggal}
-                        onChange={(e) => setTanggal(e.target.value)}
-                        placeholder="Tanggal Berangkat"
-                        className="w-full px-4 py-2 border border-gray-300 rounded"
-                    />
-
+                <div className="mb-8" aria-hidden="true">
                     {/* Input Search */}
-                    <div className="relative w-full">
-                        <input
-                            type="text"
-                            placeholder="Cari Destinasi yang Ingin Kamu Kunjungi"
-                            className="w-full px-4 py-2 border border-gray-300 rounded"
-                            value={searchQuery} // Keyword pencarian buat query ke database atau API
-                            onChange={handleSearch}
-                        />
+                    <SearchBox
+                        accessToken="pk.eyJ1Ijoieml6a3kxMyIsImEiOiJjbHk2cTJxb2UwYzV1MmtvbG85a2EzNjJhIn0.j9trVLB7KjGq70mruHsuRQ"
+                        options={{
+                            types: "place",
+                        }}
+                        // Fungsi untuk menampilkan data hasil pencarian
+                        onRetrieve={(result) => {
+                            if (result.features && result.features.length > 0) {
+                                const coordinates =
+                                    result.features[0].geometry.coordinates;
+                                setKoordinatList((prev) => {
+                                    // Jika prev belum ada, inisialisasi dengan objek kosong
+                                    const currentList = prev?.coordinates || [];
+                                    return {
+                                        coordinates: [
+                                            ...currentList,
+                                            coordinates,
+                                        ],
+                                    };
+                                });
 
-                        {/* Dropdown Recommendations */}
-                        {filteredResults.length > 0 && (
-                            <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow-lg mt-1">
-                                {filteredResults.map((tempat, index) => (
-                                    <li
-                                        key={index}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                        onClick={() => {
-                                            setSearchQuery(tempat.nama); // buat naro value di search bar
-                                            setFilteredResults([]); // buat reset fileteredResults
-                                            setTempatKunjunganList([
-                                                ...tempatKunjunganList,
-                                                tempat,
-                                            ]); // tambahkan tempat ke array tempatKunjunganList
-                                        }}
-                                    >
-                                        {tempat.nama} - {tempat.alamat}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
+                                setTempatKunjunganList((prev) => [
+                                    ...prev,
+                                    {
+                                        nama: result.features[0].properties
+                                            .name,
+                                        alamat: result.features[0].properties
+                                            .place_formatted,
+                                    },
+                                ]);
+                            }
+                        }}
+                    />
                 </div>
 
                 {/* Daftar Tempat Kunjungan */}
@@ -116,7 +83,14 @@ export default function BuatPerjalanan() {
 
                 {/* Tombol Konfirmasi */}
                 <div className="flex justify-center mt-8">
-                    <PrimaryButton>Konfirmasi Perjalanan Kamu</PrimaryButton>
+                    <PrimaryButton
+                        onClick={() => {
+                            // Nanti disini akan diarahkan ke halaman ReviewPerjalanan
+                            console.log("Konfirmasi Perjalanan");
+                        }}
+                    >
+                        Konfirmasi Perjalanan Kamu
+                    </PrimaryButton>
                 </div>
             </div>
         </AuthenticatedLayout>
