@@ -11,7 +11,7 @@ import { useState } from "react";
 // - Nanti hasil olahan data tempat kunjungan akan dijadikan rute perjalanan dan ditampilkan di ReviewPerjalanan Page
 export default function BuatPerjalanan() {
     const [tempatKunjunganList, setTempatKunjunganList] = useState([]); // Variabel buat nampung daftar tempat kunjungan
-    const [koordinatList, setKoordinatList] = useState([]); // Variabel buat nampung daftar koordinat tempat kunjungan
+    const [koordinatList, setKoordinatList] = useState(); // Variabel buat nampung daftar koordinat tempat kunjungan
 
     console.log(koordinatList);
     console.log(tempatKunjunganList);
@@ -34,20 +34,23 @@ export default function BuatPerjalanan() {
                     <SearchBox
                         accessToken="pk.eyJ1Ijoieml6a3kxMyIsImEiOiJjbHk2cTJxb2UwYzV1MmtvbG85a2EzNjJhIn0.j9trVLB7KjGq70mruHsuRQ"
                         options={{
-                            language: "id",
+                            types: "place",
                         }}
                         // Fungsi untuk menampilkan data hasil pencarian
                         onRetrieve={(result) => {
                             if (result.features && result.features.length > 0) {
                                 const coordinates =
                                     result.features[0].geometry.coordinates;
-                                setKoordinatList((prev) => [
-                                    ...prev,
-                                    {
-                                        long: coordinates[0],
-                                        lat: coordinates[1],
-                                    },
-                                ]);
+                                setKoordinatList((prev) => {
+                                    // Jika prev belum ada, inisialisasi dengan objek kosong
+                                    const currentList = prev?.coordinates || [];
+                                    return {
+                                        coordinates: [
+                                            ...currentList,
+                                            coordinates,
+                                        ],
+                                    };
+                                });
 
                                 setTempatKunjunganList((prev) => [
                                     ...prev,
@@ -56,7 +59,6 @@ export default function BuatPerjalanan() {
                                             .name,
                                         alamat: result.features[0].properties
                                             .place_formatted,
-                                        // hasil: result.features[0],
                                     },
                                 ]);
                             }
