@@ -3,6 +3,7 @@ import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { SearchBox } from "@mapbox/search-js-react";
 import { useState } from "react";
+import axios from "axios"; // Untuk HTTP request
 
 // Notes untuk backend:
 // - Buat API endpoint untuk mengambil data tempat kunjungan
@@ -15,6 +16,36 @@ export default function BuatPerjalanan() {
 
     console.log(koordinatList);
     console.log(tempatKunjunganList);
+
+    const handleKonfirmasi = async () => {
+        try {
+            // Panggil API dengan data koordinat
+            const response = await axios.post("/generateroute", {
+                coordinates: koordinatList.coordinates,
+            });
+
+            // Simpan hasil di localStorage
+            localStorage.setItem(
+                "optimizedRoute",
+                JSON.stringify({
+                    tempatKunjunganList,
+                    optimizedRoute: response.data.optimized_route.route.map(
+                        (index) => koordinatList.coordinates[index]
+                    ),
+                })
+            );
+
+            console.log(response);
+            console.log(localStorage);
+
+            // Redirect ke halaman ReviewPerjalanan
+            window.location.href = "/reviewPerjalanan";
+        } catch (error) {
+            console.error("Error fetching optimized route:", error);
+            alert("Gagal memproses rute terbaik. Coba lagi.");
+        }
+    };
+
     return (
         <AuthenticatedLayout
             header={
@@ -32,9 +63,10 @@ export default function BuatPerjalanan() {
                 <div className="mb-8" aria-hidden="true">
                     {/* Input Search */}
                     <SearchBox
-                        accessToken="pk.eyJ1Ijoieml6a3kxMyIsImEiOiJjbHk2cTJxb2UwYzV1MmtvbG85a2EzNjJhIn0.j9trVLB7KjGq70mruHsuRQ"
+                        accessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}
                         options={{
-                            types: "place",
+                            types: "poi",
+                            limit: 10,
                         }}
                         // Fungsi untuk menampilkan data hasil pencarian
                         onRetrieve={(result) => {
@@ -83,12 +115,7 @@ export default function BuatPerjalanan() {
 
                 {/* Tombol Konfirmasi */}
                 <div className="flex justify-center mt-8">
-                    <PrimaryButton
-                        onClick={() => {
-                            // Nanti disini akan diarahkan ke halaman ReviewPerjalanan
-                            console.log("Konfirmasi Perjalanan");
-                        }}
-                    >
+                    <PrimaryButton onClick={handleKonfirmasi}>
                         Konfirmasi Perjalanan Kamu
                     </PrimaryButton>
                 </div>

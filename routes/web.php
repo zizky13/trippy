@@ -27,10 +27,11 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/buatperjalanan', function () {
     return Inertia::render('BuatPerjalanan');
-});
-Route::get('/reviewperjalanan', function () {
+})->middleware(['auth', 'verified'])->name('buatPerjalanan');
+
+Route::get('/reviewPerjalanan', function () {
     return Inertia::render('ReviewPerjalanan');
-});
+})->middleware(['auth', 'verified'])->name('reviewPerjalanan');;
 
 Route::get('/api/trips', function () {
     return response()->json([
@@ -55,6 +56,6 @@ Route::get('/api/trips', function () {
     ]);
 });
 
-Route::get('/generateroute', [TSPController::class, 'getOptimizedRoute']);
+Route::post('/generateroute', [TSPController::class, 'getOptimizedRoute']);
 
 require __DIR__.'/auth.php';

@@ -8,93 +8,103 @@ import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PrimaryButton from "@/Components/PrimaryButton";
 
-const dummyData = [
-    { nama: "Pantai Kuta", alamat: "Bali", coordinates: [115.1699, -8.7195] },
-    {
-        nama: "Candi Borobudur",
-        alamat: "Magelang",
-        coordinates: [110.2187, -7.6079],
-    },
-    {
-        nama: "Gunung Bromo",
-        alamat: "Jawa Timur",
-        coordinates: [112.9533, -7.9425],
-    },
-    { nama: "Raja Ampat", alamat: "Papua", coordinates: [130.5123, -0.2312] },
-    {
-        nama: "Danau Toba",
-        alamat: "Sumatera Utara",
-        coordinates: [98.9306, 2.6874],
-    },
-    {
-        nama: "Taman Mini Indonesia Indah",
-        alamat: "Jakarta",
-        coordinates: [106.8956, -6.3024],
-    },
-    {
-        nama: "Pulau Komodo",
-        alamat: "Nusa Tenggara Timur",
-        coordinates: [119.4889, -8.5466],
-    },
-    {
-        nama: "Tana Toraja",
-        alamat: "Sulawesi Selatan",
-        coordinates: [119.8576, -2.9707],
-    },
-    {
-        nama: "Kawah Ijen",
-        alamat: "Jawa Timur",
-        coordinates: [114.2421, -8.0584],
-    },
-];
-
 function ReviewPerjalanan() {
     const mapRef = useRef();
     const mapContainerRef = useRef();
+    const [routeData, setRouteData] = useState(null); // Buat nyimpen rute terbaik
+    console.log(localStorage);
 
     useEffect(() => {
-        mapboxgl.accessToken =
-            "pk.eyJ1Ijoieml6a3kxMyIsImEiOiJjbHk2cTJxb2UwYzV1MmtvbG85a2EzNjJhIn0.j9trVLB7KjGq70mruHsuRQ";
+        // Ambil data dari localStorage
+        const storedRoute = localStorage.getItem("optimizedRoute");
+        if (storedRoute) {
+            setRouteData(JSON.parse(storedRoute));
+        }
 
-        // Inisialisasi peta dengan pengaturan dasar
+        mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+
+        // Inisialisasi peta
         mapRef.current = new mapboxgl.Map({
             container: mapContainerRef.current,
-            style: "mapbox://styles/mapbox/streets-v11", // Gaya default Mapbox
-            center: [106.8956, -6.3024], // Koordinat Jakarta
-            zoom: 5, // Tingkat zoom lebih cocok untuk Indonesia
+            style: "mapbox://styles/mapbox/streets-v11",
+            center: [106.8956, -6.3024],
+            zoom: 5,
         });
 
-        // Menambahkan marker untuk setiap tempat
-        dummyData.forEach((tempat, index) => {
-            const markerElement = document.createElement("div");
-            markerElement.className = "custom-marker";
-            markerElement.style.backgroundColor = "red"; // Bisa disesuaikan
-            markerElement.style.borderRadius = "50%";
-            markerElement.style.width = "30px";
-            markerElement.style.height = "30px";
-            markerElement.style.display = "flex";
-            markerElement.style.alignItems = "center";
-            markerElement.style.justifyContent = "center";
-            markerElement.style.color = "white";
-            markerElement.style.fontWeight = "bold";
-            markerElement.innerHTML = index + 1; // Menampilkan angka urutan
+        return () => mapRef.current.remove();
+    }, []);
 
-            // Menambahkan marker ke peta
-            new mapboxgl.Marker(markerElement)
-                .setLngLat(tempat.coordinates)
-                .setPopup(
-                    new mapboxgl.Popup().setHTML(
-                        `<h3>${tempat.nama}</h3><p>${tempat.alamat}</p>`
-                    )
-                ) // Menambahkan popup
-                .addTo(mapRef.current);
+    useEffect(() => {
+        // Inisialisasi peta
+        mapRef.current = new mapboxgl.Map({
+            container: mapContainerRef.current,
+            style: "mapbox://styles/mapbox/streets-v11",
+            center: [106.8956, -6.3024],
+            zoom: 5,
         });
 
-        // Pembersihan map saat komponen dilepas
+        // Tunggu hingga peta selesai dimuat
+        mapRef.current.on("load", () => {
+            console.log("Peta selesai dimuat");
+
+            // Jika terdapat routeData, tambahkan polyline dan marker
+            if (routeData && Array.isArray(routeData.optimizedRoute)) {
+                const coordinates = routeData.optimizedRoute;
+
+                // Tambahkan marker dengan nomor urutan
+                coordinates.forEach((coordinate, index) => {
+                    const tempat = routeData.tempatKunjunganList[index];
+                    if (tempat) {
+                        const markerElement = document.createElement("div");
+                        markerElement.className = "custom-marker";
+                        markerElement.style.backgroundColor = "red";
+                        markerElement.style.borderRadius = "50%";
+                        markerElement.style.width = "30px";
+                        markerElement.style.height = "30px";
+                        markerElement.style.display = "flex";
+                        markerElement.style.alignItems = "center";
+                        markerElement.style.justifyContent = "center";
+                        markerElement.style.color = "white";
+                        markerElement.style.fontWeight = "bold";
+                        markerElement.innerHTML = index + 1;
+
+                        new mapboxgl.Marker(markerElement)
+                            .setLngLat(coordinate)
+                            .setPopup(
+                                new mapboxgl.Popup().setHTML(
+                                    `<h3>${tempat.nama}</h3><p>${tempat.alamat}</p>`
+                                )
+                            )
+                            .addTo(mapRef.current);
+                    }
+                });
+
+                // Tambahkan polyline
+                const routeLine = {
+                    type: "Feature",
+                    geometry: { type: "LineString", coordinates },
+                };
+
+                mapRef.current.addSource("route", {
+                    type: "geojson",
+                    data: routeLine,
+                });
+
+                mapRef.current.addLayer({
+                    id: "route",
+                    type: "line",
+                    source: "route",
+                    layout: { "line-join": "round", "line-cap": "round" },
+                    paint: { "line-color": "#FF5733", "line-width": 4 },
+                });
+            }
+        });
+
+        // Pembersihan peta saat komponen dilepas
         return () => {
             mapRef.current.remove();
         };
-    }, []);
+    }, [routeData]);
 
     return (
         <AuthenticatedLayout
@@ -117,12 +127,15 @@ function ReviewPerjalanan() {
                             Tempat Kunjungan
                         </h3>
                         <div className="flex flex-col gap-4">
-                            {dummyData.map((tempat, index) => (
-                                <TempatKunjunganCard
-                                    key={index}
-                                    tempatKunjungan={tempat}
-                                />
-                            ))}
+                            {routeData &&
+                                routeData.tempatKunjunganList.map(
+                                    (tempat, index) => (
+                                        <TempatKunjunganCard
+                                            key={index}
+                                            tempatKunjungan={tempat}
+                                        />
+                                    )
+                                )}
                         </div>
                     </div>
 
