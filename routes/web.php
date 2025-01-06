@@ -29,7 +29,7 @@ Route::get('/buatperjalanan', function () {
     return Inertia::render('BuatPerjalanan');
 })->middleware(['auth', 'verified'])->name('buatPerjalanan');
 
-Route::get('/reviewPerjalanan', function () {
+Route::get('/reviewperjalanan', function () {
     return Inertia::render('ReviewPerjalanan');
 })->middleware(['auth', 'verified'])->name('reviewPerjalanan');;
 
