@@ -2,47 +2,88 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { SearchBox } from "@mapbox/search-js-react";
-import { useState } from "react";
-import axios from "axios"; // Untuk HTTP request
+import { useState, useRef } from "react";
+import axios from "axios";
 
-// Notes untuk backend:
-// - Buat API endpoint untuk mengambil data tempat kunjungan
-// - Data yang diambil: nama tempat, alamat, dan koordinat (latitude, longitude)
-// - Buat proses untuk mengolah data tempat kunjungan yang diinput user (implementasi algoritma TSP)
-// - Nanti hasil olahan data tempat kunjungan akan dijadikan rute perjalanan dan ditampilkan di ReviewPerjalanan Page
 export default function BuatPerjalanan() {
-    const [tempatKunjunganList, setTempatKunjunganList] = useState([]); // Variabel buat nampung daftar tempat kunjungan
-    const [koordinatList, setKoordinatList] = useState(); // Variabel buat nampung daftar koordinat tempat kunjungan
-
-    console.log(koordinatList);
-    console.log(tempatKunjunganList);
+    const [tempatKunjunganList, setTempatKunjunganList] = useState([]);
+    const [koordinatList, setKoordinatList] = useState();
+    const [isLoading, setIsLoading] = useState(false);
+    const searchBoxRef = useRef(null); // Referensi untuk SearchBox
 
     const handleKonfirmasi = async () => {
+        setIsLoading(true);
         try {
-            // Panggil API dengan data koordinat
             const response = await axios.post("/generateroute", {
                 coordinates: koordinatList.coordinates,
             });
 
-            // Simpan hasil di localStorage
             localStorage.setItem(
                 "optimizedRoute",
                 JSON.stringify({
-                    tempatKunjunganList,
+                    tempatKunjunganList:
+                        response.data.optimized_route.route.map(
+                            (index) => tempatKunjunganList[index]
+                        ),
                     optimizedRoute: response.data.optimized_route.route.map(
                         (index) => koordinatList.coordinates[index]
                     ),
                 })
             );
 
-            console.log(response);
-            console.log(localStorage);
-
-            // Redirect ke halaman ReviewPerjalanan
-            window.location.href = "/reviewPerjalanan";
+            window.location.href = "/reviewperjalanan";
         } catch (error) {
             console.error("Error fetching optimized route:", error);
             alert("Gagal memproses rute terbaik. Coba lagi.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleHapus = (index) => {
+        setTempatKunjunganList((prev) => {
+            const newList = [...prev];
+            newList.splice(index, 1);
+            return newList;
+        });
+
+        setKoordinatList((prev) => {
+            const currentList = prev?.coordinates || [];
+            const newList = [...currentList];
+            newList.splice(index, 1);
+            return {
+                coordinates: newList,
+            };
+        });
+    };
+
+    const handleRetrieve = (result) => {
+        if (result.features && result.features.length > 0) {
+            const coordinates = result.features[0].geometry.coordinates;
+            setKoordinatList((prev) => {
+                const currentList = prev?.coordinates || [];
+                return {
+                    coordinates: [...currentList, coordinates],
+                };
+            });
+
+            setTempatKunjunganList((prev) => [
+                ...prev,
+                {
+                    nama: result.features[0].properties.name,
+                    alamat: result.features[0].properties.place_formatted,
+                },
+            ]);
+
+            // Reset nilai input di SearchBox
+            if (searchBoxRef.current) {
+                const inputElement = searchBoxRef.current.querySelector(
+                    "input.mapboxgl-ctrl-geocoder--input"
+                );
+                if (inputElement) {
+                    inputElement.value = ""; // Kosongkan nilai input
+                }
+            }
         }
     };
 
@@ -59,46 +100,21 @@ export default function BuatPerjalanan() {
                     Buat Perjalananmu
                 </h1>
 
-                {/* Input Form */}
                 <div className="mb-8" aria-hidden="true">
-                    {/* Input Search */}
-                    <SearchBox
-                        accessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}
-                        options={{
-                            types: "poi",
-                            limit: 10,
-                        }}
-                        // Fungsi untuk menampilkan data hasil pencarian
-                        onRetrieve={(result) => {
-                            if (result.features && result.features.length > 0) {
-                                const coordinates =
-                                    result.features[0].geometry.coordinates;
-                                setKoordinatList((prev) => {
-                                    // Jika prev belum ada, inisialisasi dengan objek kosong
-                                    const currentList = prev?.coordinates || [];
-                                    return {
-                                        coordinates: [
-                                            ...currentList,
-                                            coordinates,
-                                        ],
-                                    };
-                                });
-
-                                setTempatKunjunganList((prev) => [
-                                    ...prev,
-                                    {
-                                        nama: result.features[0].properties
-                                            .name,
-                                        alamat: result.features[0].properties
-                                            .place_formatted,
-                                    },
-                                ]);
+                    <div ref={searchBoxRef}>
+                        <SearchBox
+                            accessToken={
+                                import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
                             }
-                        }}
-                    />
+                            options={{
+                                types: "poi",
+                                limit: 10,
+                            }}
+                            onRetrieve={handleRetrieve}
+                        />
+                    </div>
                 </div>
 
-                {/* Daftar Tempat Kunjungan */}
                 <div className="bg-secondary-default p-6 rounded-xl shadow-lg">
                     <p className="text-lg font-medium text-gray-800 mb-4">
                         Daftar Tempat Kunjungan Kamu
@@ -108,15 +124,44 @@ export default function BuatPerjalanan() {
                             <TempatKunjunganCard
                                 key={index}
                                 tempatKunjungan={tempat}
+                                onClick={() => handleHapus(index)}
                             />
                         ))}
                     </div>
                 </div>
 
-                {/* Tombol Konfirmasi */}
                 <div className="flex justify-center mt-8">
-                    <PrimaryButton onClick={handleKonfirmasi}>
-                        Konfirmasi Perjalanan Kamu
+                    <PrimaryButton
+                        onClick={handleKonfirmasi}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <div className="flex items-center gap-2">
+                                <svg
+                                    className="animate-spin h-5 w-5 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v8H4z"
+                                    ></path>
+                                </svg>
+                                Memproses...
+                            </div>
+                        ) : (
+                            "Konfirmasi Perjalanan Kamu"
+                        )}
                     </PrimaryButton>
                 </div>
             </div>

@@ -44,3 +44,15 @@ input {
     border-radius: 10px;
     cursor: pointer;
 }
+
+.custom-marker {
+    background-color: red;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
