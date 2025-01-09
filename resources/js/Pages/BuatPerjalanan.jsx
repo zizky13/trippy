@@ -71,8 +71,9 @@ export default function BuatPerjalanan() {
             });
 
             if (createResponse.status === 201) {
+                const newItineraryId = createResponse.data.id;
                 alert("Perjalanan berhasil dibuat!");
-                window.location.href = "/dashboard";
+                window.location.href = `/detail-perjalanan/${newItineraryId}`;
             }
         } catch (error) {
             console.error("Terjadi kesalahan:", error);

@@ -15,8 +15,10 @@ export default function Dashboard({ auth }) {
             try {
                 const response = await fetch("/getAll-Itinerary"); // Nanti ganti endpoint fetch data dari database
                 const data = await response.json();
-                setAllTrip(data.itineraries); // simpen ke state biar pagenya rerender
-                console.log(data.itineraries);
+                setAllTrip(
+                    Array.isArray(data.itineraries) ? data.itineraries : []
+                ); // simpen ke state biar pagenya rerender
+                // console.log(data.itineraries);
             } catch (error) {
                 console.error("Error fetching trips:", error);
             } finally {
@@ -91,9 +93,12 @@ export default function Dashboard({ auth }) {
                     ) : (
                         <p className="mt-12 text-left font-nunito text-base font-semibold text-gray-500">
                             Kamu belum membuat rencana perjalanan apapun.{" "}
-                            <a href="" className="text-primary-default">
+                            <button
+                                onClick={handleOpenModal}
+                                className="text-primary-default"
+                            >
                                 Buat rencana perjalanan.
-                            </a>
+                            </button>
                         </p>
                     )}
                 </div>
