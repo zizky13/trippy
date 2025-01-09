@@ -2,7 +2,6 @@ import { Link } from "@inertiajs/react";
 
 export default function TripCard({
     namaTempat = "Bali Trip",
-    startDate = "12 Jan",
     link = "dashboard",
     className = "",
 }) {
@@ -21,7 +20,6 @@ export default function TripCard({
                 <h2 className="text-white text-lg font-semibold">
                     {namaTempat}
                 </h2>
-                <p className="text-white text-sm">{startDate}</p>
             </div>
         </Link>
     );
