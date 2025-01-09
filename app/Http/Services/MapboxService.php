@@ -56,7 +56,9 @@ class MapboxService
                     ]);
 
                     $data = $response->json();
-                    $distances[$i][$j] = $data['routes'][0]['legs'][0]['distance'];
+                    if($data){
+                        $distances[$i][$j] = $data['routes'][0]['legs'][0]['distance'];
+                    }
                 }
             }
         }
