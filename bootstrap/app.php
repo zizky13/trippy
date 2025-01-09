@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // CSRF Middleware Configuration: Add exception for /get-optimized-route
         $middleware->validateCsrfTokens(except: [
             '/search', // Correct path format
+            '/create-itinerary', // Correct path format 
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

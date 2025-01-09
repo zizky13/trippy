@@ -5,6 +5,7 @@ use App\Http\Controllers\TSPController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\CRUDController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -57,5 +58,9 @@ Route::get('/api/trips', function () {
 });
 
 Route::post('/generateroute', [TSPController::class, 'getOptimizedRoute']);
+Route::post('/create-itinerary', [CRUDController::class, 'create'])->middleware('auth');
+Route::get('/get-itinerary/{id}', [CRUDController::class, 'read'])->middleware('auth');
+Route::get('/delete-itinerary/{id}', [CRUDController::class, 'delete'])->middleware('auth');
+Route::post('/update-itinerary/{id}', [CRUDController::class, 'update'])->middleware('auth');
 
 require __DIR__.'/auth.php';
