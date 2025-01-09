@@ -2,7 +2,7 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { SearchBox } from "@mapbox/search-js-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
 export default function BuatPerjalanan() {
@@ -10,31 +10,43 @@ export default function BuatPerjalanan() {
     const [koordinatList, setKoordinatList] = useState();
     const [isLoading, setIsLoading] = useState(false);
     const searchBoxRef = useRef(null); // Referensi untuk SearchBox
+    const [itineraryName, setItineraryName] = useState(""); // State untuk menyimpan nama itinerary
+
+    useEffect(() => {
+        // Ambil nama itinerary dari query string
+        const queryParams = new URLSearchParams(window.location.search);
+        const name = queryParams.get("name");
+
+        if (name) {
+            setItineraryName(name);
+        } else {
+            // Jika nama itinerary tidak ada di query string, arahkan kembali ke dashboard
+            window.location.href = "/dashboard";
+        }
+    }, []);
 
     const handleKonfirmasi = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post("/generateroute", {
-                coordinates: koordinatList.coordinates,
-            });
+            // Ambil data yang diperlukan untuk API
+            const data = {
+                itineraryName: itineraryName, // Bisa diganti sesuai input pengguna jika ada
+                userId: 1, // ID pengguna, jika Anda menggunakan autentikasi, ambil dari context atau token
+                optimizedRoute: koordinatList.coordinates,
+                tempatKunjunganList: tempatKunjunganList,
+            };
 
-            localStorage.setItem(
-                "optimizedRoute",
-                JSON.stringify({
-                    tempatKunjunganList:
-                        response.data.optimized_route.route.map(
-                            (index) => tempatKunjunganList[index]
-                        ),
-                    optimizedRoute: response.data.optimized_route.route.map(
-                        (index) => koordinatList.coordinates[index]
-                    ),
-                })
-            );
+            // Kirim permintaan POST ke API
+            const response = await axios.post("/create-itinerary", data);
 
-            window.location.href = "/reviewperjalanan";
+            // Jika sukses, arahkan ke dashboard
+            if (response.status === 201) {
+                alert("Perjalanan berhasil dibuat!");
+                window.location.href = "/dashboard"; // Ganti dengan route dashboard Anda
+            }
         } catch (error) {
-            console.error("Error fetching optimized route:", error);
-            alert("Gagal memproses rute terbaik. Coba lagi.");
+            console.error("Gagal membuat perjalanan:", error);
+            alert("Terjadi kesalahan saat membuat perjalanan. Coba lagi.");
         } finally {
             setIsLoading(false);
         }
@@ -97,7 +109,7 @@ export default function BuatPerjalanan() {
         >
             <div className="px-6 py-8">
                 <h1 className="text-4xl font-bold text-gray-800 mb-8">
-                    Buat Perjalananmu
+                    {itineraryName}
                 </h1>
 
                 <div className="mb-8" aria-hidden="true">
