@@ -38,32 +38,11 @@ Route::get('/detailperjalanan', function () {
     return Inertia::render('DetailPerjalanan');
 })->middleware(['auth', 'verified'])->name('detailPerjalanan');
 
-Route::get('/api/trips', function () {
-    return response()->json([
-        [
-            'id' => 1,
-            'namaTempat' => 'Bali Trip',
-            'startDate' => '12 Jan',
-            'tripUrl' => '/trips/1',
-        ],
-        [
-            'id' => 2,
-            'namaTempat' => 'Lombok Adventure',
-            'startDate' => '20 Feb',
-            'tripUrl' => '/trips/2',
-        ],
-        [
-            'id' => 3,
-            'namaTempat' => 'Jakarta Getaway',
-            'startDate' => '5 Mar',
-            'tripUrl' => '/trips/3',
-        ],
-    ]);
-});
-
 Route::post('/generateroute', [TSPController::class, 'getOptimizedRoute']);
 Route::post('/create-itinerary', [CRUDController::class, 'create'])->middleware('auth');
-Route::get('/get-itinerary/{id}', [CRUDController::class, 'read'])->middleware('auth');
+Route::get('/detail-perjalanan/{id}', function ($id) {
+    return inertia('DetailPerjalanan', ['id' => $id]);
+})->middleware('auth');
 Route::get('/delete-itinerary/{id}', [CRUDController::class, 'delete'])->middleware('auth');
 Route::post('/update-itinerary/{id}', [CRUDController::class, 'update'])->middleware('auth');
 Route::get('/getAll-Itinerary', [CRUDController::class, 'getAll'])->middleware('auth');

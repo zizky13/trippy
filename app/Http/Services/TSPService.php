@@ -53,9 +53,6 @@ class TSPService
             }
         }
 
-        // Add starting city at the end to complete the circuit
-        $shortestRoute[] = 0;
-
         return [
             'route' => $shortestRoute,
             'distance' => $minDistance

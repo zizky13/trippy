@@ -61,7 +61,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             <div className="mt-10 flex items-center justify-center gap-x-6">
                                 <PrimaryButton className="font-nunito font-medium h-15">
                                     <a
-                                        href="#"
+                                        href={route("login")}
                                         className="text-lg flex items-center gap-3"
                                     >
                                         <BiTrip /> Optimized Trip

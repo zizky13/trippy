@@ -84,6 +84,7 @@ export default function Dashboard({ auth }) {
                                 <TripCard
                                     key={trip.id}
                                     namaTempat={trip.itinerary_name}
+                                    link={`/detail-perjalanan/${trip.id}`} // Tambahkan rute dinamis
                                 />
                             ))}
                         </div>

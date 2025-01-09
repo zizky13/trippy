@@ -3,6 +3,7 @@ import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { SearchBox } from "@mapbox/search-js-react";
 import { useState, useRef, useEffect } from "react";
+import { Head } from "@inertiajs/react";
 import axios from "axios";
 
 export default function BuatPerjalanan() {
@@ -11,42 +12,71 @@ export default function BuatPerjalanan() {
     const [isLoading, setIsLoading] = useState(false);
     const searchBoxRef = useRef(null); // Referensi untuk SearchBox
     const [itineraryName, setItineraryName] = useState(""); // State untuk menyimpan nama itinerary
+    const [isEditingName, setIsEditingName] = useState(true); // State untuk mengontrol mode input nama itinerary
 
     useEffect(() => {
-        // Ambil nama itinerary dari query string
+        // Ambil nama itinerary dari query string (opsional jika ingin mendukung query string)
         const queryParams = new URLSearchParams(window.location.search);
         const name = queryParams.get("name");
 
         if (name) {
             setItineraryName(name);
-        } else {
-            // Jika nama itinerary tidak ada di query string, arahkan kembali ke dashboard
-            window.location.href = "/dashboard";
+            setIsEditingName(false); // Nama itinerary sudah diisi, tampilkan halaman utama
         }
     }, []);
+
+    useEffect(() => {
+        // Reset nilai input di SearchBox ketika tempatKunjunganList atau koordinatList berubah
+        if (searchBoxRef.current) {
+            const inputElement = searchBoxRef.current.querySelector(
+                "input.mapboxgl-ctrl-geocoder--input"
+            );
+            if (inputElement) {
+                inputElement.value = ""; // Kosongkan nilai input
+            }
+        }
+    }, [tempatKunjunganList, koordinatList]); // Trigger efek ketika salah satu berubah
+
+    const handleSimpanNama = () => {
+        if (itineraryName.trim() === "") {
+            alert("Nama itinerary tidak boleh kosong.");
+            return;
+        }
+        setIsEditingName(false); // Selesai mengedit, tampilkan halaman utama
+    };
 
     const handleKonfirmasi = async () => {
         setIsLoading(true);
         try {
-            // Ambil data yang diperlukan untuk API
-            const data = {
-                itineraryName: itineraryName, // Bisa diganti sesuai input pengguna jika ada
-                userId: 1, // ID pengguna, jika Anda menggunakan autentikasi, ambil dari context atau token
-                optimizedRoute: koordinatList.coordinates,
-                tempatKunjunganList: tempatKunjunganList,
-            };
+            const optimizeResponse = await axios.post("/generateroute", {
+                coordinates: koordinatList.coordinates,
+            });
 
-            // Kirim permintaan POST ke API
-            const response = await axios.post("/create-itinerary", data);
+            const optimizedRouteIndexes =
+                optimizeResponse.data.optimized_route.route;
 
-            // Jika sukses, arahkan ke dashboard
-            if (response.status === 201) {
+            const sortedTempatKunjunganList = optimizedRouteIndexes.map(
+                (index) => tempatKunjunganList[index]
+            );
+
+            const sortedCoordinates = optimizedRouteIndexes.map(
+                (index) => koordinatList.coordinates[index]
+            );
+
+            const createResponse = await axios.post("/create-itinerary", {
+                itineraryName: itineraryName,
+                userId: 1, // Ganti dengan ID pengguna
+                optimizedRoute: sortedCoordinates,
+                tempatKunjunganList: sortedTempatKunjunganList,
+            });
+
+            if (createResponse.status === 201) {
                 alert("Perjalanan berhasil dibuat!");
-                window.location.href = "/dashboard"; // Ganti dengan route dashboard Anda
+                window.location.href = "/dashboard";
             }
         } catch (error) {
-            console.error("Gagal membuat perjalanan:", error);
-            alert("Terjadi kesalahan saat membuat perjalanan. Coba lagi.");
+            console.error("Terjadi kesalahan:", error);
+            alert("Gagal memproses perjalanan. Coba lagi.");
         } finally {
             setIsLoading(false);
         }
@@ -87,13 +117,12 @@ export default function BuatPerjalanan() {
                 },
             ]);
 
-            // Reset nilai input di SearchBox
             if (searchBoxRef.current) {
                 const inputElement = searchBoxRef.current.querySelector(
                     "input.mapboxgl-ctrl-geocoder--input"
                 );
                 if (inputElement) {
-                    inputElement.value = ""; // Kosongkan nilai input
+                    inputElement.value = "";
                 }
             }
         }
@@ -107,76 +136,103 @@ export default function BuatPerjalanan() {
                 </h2>
             }
         >
-            <div className="px-6 py-8">
-                <h1 className="text-4xl font-bold text-gray-800 mb-8">
-                    {itineraryName}
-                </h1>
-
-                <div className="mb-8" aria-hidden="true">
-                    <div ref={searchBoxRef}>
-                        <SearchBox
-                            accessToken={
-                                import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
-                            }
-                            options={{
-                                types: "poi",
-                                limit: 10,
-                            }}
-                            onRetrieve={handleRetrieve}
+            <Head title="Buat Perjalanan" />
+            {isEditingName ? (
+                <div className="px-6 py-8">
+                    <h1 className="text-4xl font-bold text-gray-800 mb-6">
+                        Buat Nama Itinerary
+                    </h1>
+                    <div className="mb-6">
+                        <label
+                            htmlFor="itineraryName"
+                            className="block text-sm font-medium text-gray-700"
+                        >
+                            Nama Itinerary
+                        </label>
+                        <input
+                            type="text"
+                            id="itineraryName"
+                            className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-default focus:border-primary-default sm:text-sm"
+                            value={itineraryName}
+                            onChange={(e) => setItineraryName(e.target.value)}
                         />
                     </div>
-                </div>
-
-                <div className="bg-secondary-default p-6 rounded-xl shadow-lg">
-                    <p className="text-lg font-medium text-gray-800 mb-4">
-                        Daftar Tempat Kunjungan Kamu
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {tempatKunjunganList.map((tempat, index) => (
-                            <TempatKunjunganCard
-                                key={index}
-                                tempatKunjungan={tempat}
-                                onClick={() => handleHapus(index)}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                <div className="flex justify-center mt-8">
-                    <PrimaryButton
-                        onClick={handleKonfirmasi}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <div className="flex items-center gap-2">
-                                <svg
-                                    className="animate-spin h-5 w-5 text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        className="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        strokeWidth="4"
-                                    ></circle>
-                                    <path
-                                        className="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8v8H4z"
-                                    ></path>
-                                </svg>
-                                Memproses...
-                            </div>
-                        ) : (
-                            "Konfirmasi Perjalanan Kamu"
-                        )}
+                    <PrimaryButton onClick={handleSimpanNama}>
+                        Simpan Nama Itinerary
                     </PrimaryButton>
                 </div>
-            </div>
+            ) : (
+                <div className="px-6 py-8">
+                    <h1 className="text-4xl font-bold text-gray-800 mb-8">
+                        {itineraryName}
+                    </h1>
+
+                    <div className="mb-8">
+                        <div ref={searchBoxRef}>
+                            <SearchBox
+                                accessToken={
+                                    import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
+                                }
+                                options={{
+                                    types: "poi",
+                                    limit: 10,
+                                }}
+                                onRetrieve={handleRetrieve}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="bg-secondary-default p-6 rounded-xl shadow-lg">
+                        <p className="text-lg font-medium text-gray-800 mb-4">
+                            Daftar Tempat Kunjungan Kamu
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {tempatKunjunganList.map((tempat, index) => (
+                                <TempatKunjunganCard
+                                    key={index}
+                                    tempatKunjungan={tempat}
+                                    onClick={() => handleHapus(index)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center mt-8">
+                        <PrimaryButton
+                            onClick={handleKonfirmasi}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <div className="flex items-center gap-2">
+                                    <svg
+                                        className="animate-spin h-5 w-5 text-white"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        ></circle>
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8v8H4z"
+                                        ></path>
+                                    </svg>
+                                    Memproses...
+                                </div>
+                            ) : (
+                                "Konfirmasi Perjalanan Kamu"
+                            )}
+                        </PrimaryButton>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

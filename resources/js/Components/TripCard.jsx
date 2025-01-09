@@ -2,13 +2,13 @@ import { Link } from "@inertiajs/react";
 
 export default function TripCard({
     namaTempat = "Bali Trip",
-    link = "dashboard",
+    link = "#",
     className = "",
 }) {
     return (
         // Di bawah pake route("link"), link dari props
         <Link
-            to=""
+            href={link}
             className={`my-10 mx-7 inline-block relative w-full h-32 overflow-hidden rounded-lg shadow-lg  ${className} lg:w-5/12`}
         >
             <img

@@ -47,6 +47,22 @@ export default function DetailPerjalanan({}) {
                                 .addTo(mapRef.current);
                         }
                     });
+
+                    // Hitung bounds berdasarkan semua koordinat
+                    const bounds = coordinates.reduce(
+                        (bounds, coord) => bounds.extend(coord),
+                        new mapboxgl.LngLatBounds(
+                            coordinates[0],
+                            coordinates[0]
+                        )
+                    );
+
+                    // Terapkan fitBounds untuk animasi zoom dinamis
+                    mapRef.current.fitBounds(bounds, {
+                        padding: 50, // Tambahkan padding di sekitar bounds
+                        maxZoom: 15, // Maksimal zoom level
+                        duration: 2000, // Durasi animasi dalam milidetik
+                    });
                 }
             });
         } catch (error) {
