@@ -101,7 +101,7 @@ function ReviewPerjalanan() {
                     </div>
                 </div>
                 <div className="text-center mt-8">
-                    <PrimaryButton>Selesai</PrimaryButton>
+                    <PrimaryButton>Simpan</PrimaryButton>
                 </div>
             </div>
         </AuthenticatedLayout>

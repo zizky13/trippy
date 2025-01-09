@@ -3,6 +3,7 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 export default function DetailPerjalanan({}) {
     const mapRef = useRef(null);
     const mapContainerRef = useRef(null);
@@ -19,11 +20,34 @@ export default function DetailPerjalanan({}) {
             mapRef.current = new mapboxgl.Map({
                 container: mapContainerRef.current,
                 style: "mapbox://styles/mapbox/streets-v11",
-                zoom: 1,
+                center: [106.8956, -6.3024],
+                zoom: 5,
             });
 
             mapRef.current.on("load", () => {
                 console.log("Peta berhasil dimuat.");
+                if (routeData?.optimizedRoute?.length > 0) {
+                    const coordinates = routeData.optimizedRoute;
+
+                    // Tambahkan marker dengan nomor urutan
+                    coordinates.forEach((coordinate, index) => {
+                        const tempat = routeData.tempatKunjunganList[index];
+                        if (tempat) {
+                            const markerElement = document.createElement("div");
+                            markerElement.className = "custom-marker";
+                            markerElement.innerHTML = index + 1;
+
+                            new mapboxgl.Marker(markerElement)
+                                .setLngLat(coordinate)
+                                .setPopup(
+                                    new mapboxgl.Popup().setHTML(
+                                        `<h3>${tempat.nama}</h3><p>${tempat.alamat}</p>`
+                                    )
+                                )
+                                .addTo(mapRef.current);
+                        }
+                    });
+                }
             });
         } catch (error) {
             console.error("Error initializing Mapbox:", error);
@@ -53,9 +77,18 @@ export default function DetailPerjalanan({}) {
                     {/* Bagian Kiri */}
                     <div className="h-[500px] overflow-y-auto">
                         <h3 className="text-lg font-medium text-gray-700 mb-4">
-                            Urutan Tempat Kunjungan
+                            Tempat Kunjungan
                         </h3>
-                        <div className="flex flex-col gap-4"></div>
+                        <div className="flex flex-col gap-4">
+                            {routeData?.tempatKunjunganList?.map(
+                                (tempat, index) => (
+                                    <TempatKunjunganCard
+                                        key={index}
+                                        tempatKunjungan={tempat}
+                                    />
+                                )
+                            )}
+                        </div>
                     </div>
 
                     {/* Bagian Kanan (Map) */}
