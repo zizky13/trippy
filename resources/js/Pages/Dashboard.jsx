@@ -11,9 +11,10 @@ export default function Dashboard({ auth }) {
     useEffect(() => {
         async function fetchTrips() {
             try {
-                const response = await fetch("/api/trips"); // Nanti ganti endpoint fetch data dari database
+                const response = await fetch("/getAll-Itinerary"); // Nanti ganti endpoint fetch data dari database
                 const data = await response.json();
-                setAllTrip(data); // simpen ke state biar pagenya rerender
+                setAllTrip(data.itineraries); // simpen ke state biar pagenya rerender
+                console.log(data.itineraries);
             } catch (error) {
                 console.error("Error fetching trips:", error);
             } finally {
@@ -58,9 +59,7 @@ export default function Dashboard({ auth }) {
                             {allTrip.map((trip) => (
                                 <TripCard
                                     key={trip.id}
-                                    namaTempat={trip.namaTempat}
-                                    startDate={trip.startDate}
-                                    endDate={trip.endDate}
+                                    namaTempat={trip.itinerary_name}
                                 />
                             ))}
                         </div>

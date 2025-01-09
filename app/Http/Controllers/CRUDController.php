@@ -63,6 +63,23 @@ class CRUDController extends Controller
         return response()->json(['itinerary' => $itinerary], 200);
     }
 
+    public function getAll()
+    {
+        // Ambil userId dari pengguna yang sedang login
+        $userId = Auth::id();
+
+        // Ambil semua itinerary milik user dengan relasi POIs
+        $itineraries = Itinerary::with('pois')->where('user_id', $userId)->get();
+
+        // Jika tidak ada data, kembalikan respons 404
+        if ($itineraries->isEmpty()) {
+            return response()->json(['error' => 'No itineraries found for this user'], 404);
+        }
+
+        // Kembalikan data itinerary beserta POI
+        return response()->json(['itineraries' => $itineraries], 200);
+    }
+
     public function delete($id)
     {
         $itinerary = Itinerary::find($id);
@@ -126,5 +143,4 @@ class CRUDController extends Controller
             'itinerary' => $itinerary->load('pois')  // Load related POIs to return
         ], 200);
     }
-
 }

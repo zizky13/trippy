@@ -66,5 +66,6 @@ Route::post('/create-itinerary', [CRUDController::class, 'create'])->middleware(
 Route::get('/get-itinerary/{id}', [CRUDController::class, 'read'])->middleware('auth');
 Route::get('/delete-itinerary/{id}', [CRUDController::class, 'delete'])->middleware('auth');
 Route::post('/update-itinerary/{id}', [CRUDController::class, 'update'])->middleware('auth');
+Route::get('/getAll-Itinerary', [CRUDController::class, 'getAll'])->middleware('auth');
 
 require __DIR__ . '/auth.php';
