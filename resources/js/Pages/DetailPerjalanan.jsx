@@ -1,11 +1,10 @@
-import { useRef, useEffect, useState } from "react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import PrimaryButton from "@/Components/PrimaryButton";
+import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import PrimaryButton from "@/Components/PrimaryButton";
-
-function ReviewPerjalanan() {
+export default function DetailPerjalanan({}) {
     const mapRef = useRef(null);
     const mapContainerRef = useRef(null);
     const [routeData, setRouteData] = useState(() => {
@@ -66,13 +65,13 @@ function ReviewPerjalanan() {
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Review Perjalanan
+                    Detail Perjalanan
                 </h2>
             }
         >
             <div className="px-6 py-8">
                 <h1 className="text-4xl font-bold text-gray-800 mb-8">
-                    Review Perjalananmu
+                    Detail Perjalananmu
                 </h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Bagian Kiri */}
@@ -101,11 +100,9 @@ function ReviewPerjalanan() {
                     </div>
                 </div>
                 <div className="text-center mt-8">
-                    <PrimaryButton>Simpan</PrimaryButton>
+                    <PrimaryButton>Selesaikan Perjalanan</PrimaryButton>
                 </div>
             </div>
         </AuthenticatedLayout>
     );
 }
-
-export default ReviewPerjalanan;

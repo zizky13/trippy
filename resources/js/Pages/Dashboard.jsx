@@ -42,7 +42,7 @@ export default function Dashboard({ auth }) {
                         </h2>
                         <PrimaryButton className="font-nunito font-medium  h-15">
                             <a
-                                href="#"
+                                href="/buatperjalanan"
                                 className="text-lg flex items-center gap-3"
                             >
                                 Buat Perjalanan Baru
