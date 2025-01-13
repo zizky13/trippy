@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
+import axios from "axios";
+import { usePage } from "@inertiajs/react";
 
 export default function DetailPerjalanan({ id }) {
     const mapRef = useRef(null);
@@ -33,6 +35,22 @@ export default function DetailPerjalanan({ id }) {
         fetchItinerary();
     }, [id]);
 
+    const handleHapus = async (id) => {
+        if (confirm("Apakah Anda yakin ingin menghapus perjalanan ini?")) {
+            try {
+                const response = await axios.delete(`/delete-itinerary/${id}`);
+                if (response.status === 200) {
+                    alert("Perjalanan berhasil dihapus!");
+                } else {
+                    alert("Terjadi kesalahan saat menghapus perjalanan.");
+                }
+            } catch (error) {
+                console.error("Error saat menghapus perjalanan:", error);
+                alert("Gagal menghapus perjalanan. Silakan coba lagi.");
+            }
+        }
+    };
+  
     useEffect(() => {
         if (!itinerary || !itinerary.pois) return;
 
@@ -120,6 +138,10 @@ export default function DetailPerjalanan({ id }) {
                 </h2>
             }
         >
+            <div>
+                <h1>Detail Perjalanan</h1>
+                <p>ID Perjalanan: {id}</p>
+            </div>
             <div className="px-6 py-8">
                 <h1 className="text-4xl font-bold text-gray-800 mb-8">
                     {itinerary.itinerary_name}
@@ -149,7 +171,9 @@ export default function DetailPerjalanan({ id }) {
                     </div>
                 </div>
                 <div className="text-center mt-8">
-                    <PrimaryButton>Selesaikan Perjalanan</PrimaryButton>
+                    <PrimaryButton onClick={() => handleHapus(id)}>
+                        Selesaikan Perjalanan
+                    </PrimaryButton>
                 </div>
             </div>
         </AuthenticatedLayout>

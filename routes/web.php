@@ -44,7 +44,7 @@ Route::get('/api/detail-perjalanan/{id}', [CRUDController::class, 'read']);
 Route::get('/detail-perjalanan/{id}', function ($id) {
     return inertia('DetailPerjalanan', ['id' => $id]);
 })->middleware('auth');
-Route::get('/delete-itinerary/{id}', [CRUDController::class, 'delete'])->middleware('auth');
+Route::delete('/delete-itinerary/{id}', [CRUDController::class, 'delete'])->middleware('auth');
 Route::post('/update-itinerary/{id}', [CRUDController::class, 'update'])->middleware('auth');
 Route::get('/getAll-Itinerary', [CRUDController::class, 'getAll'])->middleware('auth');
 
