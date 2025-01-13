@@ -48,7 +48,7 @@ export default function BuatPerjalanan() {
     const handleKonfirmasi = async () => {
         setIsLoading(true);
         try {
-            const optimizeResponse = await axios.post("/generateroute", {
+            const optimizeResponse = await axios.post("generateroute", {
                 coordinates: koordinatList.coordinates,
             });
 
@@ -63,7 +63,7 @@ export default function BuatPerjalanan() {
                 (index) => koordinatList.coordinates[index]
             );
 
-            const createResponse = await axios.post("/create-itinerary", {
+            const createResponse = await axios.post("create-itinerary", {
                 itineraryName: itineraryName,
                 userId: 1, // Ganti dengan ID pengguna
                 optimizedRoute: sortedCoordinates,
@@ -73,7 +73,7 @@ export default function BuatPerjalanan() {
             if (createResponse.status === 201) {
                 const newItineraryId = createResponse.data.id;
                 alert("Perjalanan berhasil dibuat!");
-                window.location.href = `/detail-perjalanan/${newItineraryId}`;
+                window.location.href = `detail-perjalanan/${newItineraryId}`;
             }
         } catch (error) {
             console.error("Terjadi kesalahan:", error);

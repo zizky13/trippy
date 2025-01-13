@@ -13,7 +13,7 @@ export default function Dashboard({ auth }) {
     useEffect(() => {
         async function fetchTrips() {
             try {
-                const response = await fetch("/getAll-Itinerary"); // Nanti ganti endpoint fetch data dari database
+                const response = await fetch("getAll-Itinerary"); // Nanti ganti endpoint fetch data dari database
                 const data = await response.json();
                 setAllTrip(
                     Array.isArray(data.itineraries) ? data.itineraries : []
@@ -46,7 +46,7 @@ export default function Dashboard({ auth }) {
             return;
         }
         // Arahkan ke halaman buat perjalanan dengan parameter nama itinerary
-        window.location.href = `/buatperjalanan?name=${encodeURIComponent(
+        window.location.href = `buatperjalanan?name=${encodeURIComponent(
             itineraryName
         )}`;
     };
@@ -86,7 +86,7 @@ export default function Dashboard({ auth }) {
                                 <TripCard
                                     key={trip.id}
                                     namaTempat={trip.itinerary_name}
-                                    link={`/detail-perjalanan/${trip.id}`} // Tambahkan rute dinamis
+                                    link={`detail-perjalanan/${trip.id}`} // Tambahkan rute dinamis
                                 />
                             ))}
                         </div>
