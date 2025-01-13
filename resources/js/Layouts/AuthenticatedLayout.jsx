@@ -18,7 +18,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href="/">
+                                <Link href="/trippy/public/dashboard">
                                     <p className="font-nunito font-semibold text-2xl">
                                         <a href={route("dashboard")}>Trippy</a>
                                     </p>

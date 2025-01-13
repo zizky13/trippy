@@ -26,7 +26,6 @@ function ReviewPerjalanan() {
             });
 
             mapRef.current.on("load", () => {
-                console.log("Peta berhasil dimuat.");
                 if (routeData?.optimizedRoute?.length > 0) {
                     const coordinates = routeData.optimizedRoute;
 

@@ -2,7 +2,6 @@ import ApplicationLogo from "@/Components/ApplicationLogo";
 import { Link } from "@inertiajs/react";
 
 export default function GuestLayout({ children, pagesName }) {
-    console.log(pagesName);
     return (
         <div className="flex min-h-screen">
             {/* Left Section (Image) */}

@@ -24,7 +24,6 @@ export default function DetailPerjalanan({ id }) {
                 }
                 const data = await response.json();
                 setItinerary(data.itinerary);
-                console.log(data.itinerary);
             } catch (error) {
                 console.error("Error fetching itinerary:", error);
             } finally {
@@ -38,9 +37,12 @@ export default function DetailPerjalanan({ id }) {
     const handleHapus = async (id) => {
         if (confirm("Apakah Anda yakin ingin menghapus perjalanan ini?")) {
             try {
-                const response = await axios.delete(`/delete-itinerary/${id}`);
+                const response = await axios.delete(
+                    `/trippy/public/delete-itinerary/${id}`
+                );
                 if (response.status === 200) {
                     alert("Perjalanan berhasil dihapus!");
+                    window.location.href = "/trippy/public/dashboard";
                 } else {
                     alert("Terjadi kesalahan saat menghapus perjalanan.");
                 }
@@ -50,7 +52,7 @@ export default function DetailPerjalanan({ id }) {
             }
         }
     };
-  
+
     useEffect(() => {
         if (!itinerary || !itinerary.pois) return;
 
@@ -138,10 +140,6 @@ export default function DetailPerjalanan({ id }) {
                 </h2>
             }
         >
-            <div>
-                <h1>Detail Perjalanan</h1>
-                <p>ID Perjalanan: {id}</p>
-            </div>
             <div className="px-6 py-8">
                 <h1 className="text-4xl font-bold text-gray-800 mb-8">
                     {itinerary.itinerary_name}

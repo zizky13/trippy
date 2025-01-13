@@ -18,7 +18,6 @@ export default function Dashboard({ auth }) {
                 setAllTrip(
                     Array.isArray(data.itineraries) ? data.itineraries : []
                 ); // simpen ke state biar pagenya rerender
-                // console.log(data.itineraries);
             } catch (error) {
                 console.error("Error fetching trips:", error);
             } finally {
