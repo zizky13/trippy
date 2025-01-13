@@ -48,6 +48,7 @@ export default function BuatPerjalanan() {
     const handleKonfirmasi = async () => {
         setIsLoading(true);
         try {
+            // Memanggil API untuk mendapatkan optimized route
             const optimizeResponse = await axios.post("generateroute", {
                 coordinates: koordinatList.coordinates,
             });
@@ -55,14 +56,17 @@ export default function BuatPerjalanan() {
             const optimizedRouteIndexes =
                 optimizeResponse.data.optimized_route.route;
 
+            // Urutkan daftar tempat kunjungan berdasarkan indeks optimized
             const sortedTempatKunjunganList = optimizedRouteIndexes.map(
                 (index) => tempatKunjunganList[index]
             );
 
+            // Urutkan koordinat berdasarkan indeks optimized
             const sortedCoordinates = optimizedRouteIndexes.map(
                 (index) => koordinatList.coordinates[index]
             );
 
+            // Kirim data yang sudah diurutkan ke backend
             const createResponse = await axios.post("create-itinerary", {
                 itineraryName: itineraryName,
                 userId: 1, // Ganti dengan ID pengguna
@@ -71,7 +75,7 @@ export default function BuatPerjalanan() {
             });
 
             if (createResponse.status === 201) {
-                const newItineraryId = createResponse.data.id;
+                const newItineraryId = createResponse.data.itinerary.id;
                 alert("Perjalanan berhasil dibuat!");
                 window.location.href = `detail-perjalanan/${newItineraryId}`;
             }
