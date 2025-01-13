@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
+import axios from "axios";
+import { usePage } from "@inertiajs/react";
 export default function DetailPerjalanan({}) {
     const mapRef = useRef(null);
     const mapContainerRef = useRef(null);
@@ -11,6 +13,22 @@ export default function DetailPerjalanan({}) {
         const storedRoute = localStorage.getItem("optimizedRoute");
         return storedRoute ? JSON.parse(storedRoute) : null;
     });
+    const { id } = usePage().props;
+    const handleHapus = async (id) => {
+        if (confirm("Apakah Anda yakin ingin menghapus perjalanan ini?")) {
+            try {
+                const response = await axios.delete(`/delete-itinerary/${id}`);
+                if (response.status === 200) {
+                    alert("Perjalanan berhasil dihapus!");
+                } else {
+                    alert("Terjadi kesalahan saat menghapus perjalanan.");
+                }
+            } catch (error) {
+                console.error("Error saat menghapus perjalanan:", error);
+                alert("Gagal menghapus perjalanan. Silakan coba lagi.");
+            }
+        }
+    };
 
     useEffect(() => {
         try {
@@ -85,6 +103,10 @@ export default function DetailPerjalanan({}) {
                 </h2>
             }
         >
+            <div>
+                <h1>Detail Perjalanan</h1>
+                <p>ID Perjalanan: {id}</p>
+            </div>
             <div className="px-6 py-8">
                 <h1 className="text-4xl font-bold text-gray-800 mb-8">
                     Detail Perjalananmu
@@ -116,7 +138,9 @@ export default function DetailPerjalanan({}) {
                     </div>
                 </div>
                 <div className="text-center mt-8">
-                    <PrimaryButton>Selesaikan Perjalanan</PrimaryButton>
+                    <PrimaryButton onClick={() => handleHapus(id)}>
+                        Selesaikan Perjalanan
+                    </PrimaryButton>
                 </div>
             </div>
         </AuthenticatedLayout>
