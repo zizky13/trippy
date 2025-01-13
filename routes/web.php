@@ -40,6 +40,7 @@ Route::get('/detailperjalanan', function () {
 
 Route::post('/generateroute', [TSPController::class, 'getOptimizedRoute']);
 Route::post('/create-itinerary', [CRUDController::class, 'create'])->middleware('auth');
+Route::get('/api/detail-perjalanan/{id}', [CRUDController::class, 'read']);
 Route::get('/detail-perjalanan/{id}', function ($id) {
     return inertia('DetailPerjalanan', ['id' => $id]);
 })->middleware('auth');

@@ -6,14 +6,35 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import TempatKunjunganCard from "@/Components/TempatKunjunganCard";
 import axios from "axios";
 import { usePage } from "@inertiajs/react";
-export default function DetailPerjalanan({}) {
+
+export default function DetailPerjalanan({ id }) {
     const mapRef = useRef(null);
     const mapContainerRef = useRef(null);
-    const [routeData, setRouteData] = useState(() => {
-        const storedRoute = localStorage.getItem("optimizedRoute");
-        return storedRoute ? JSON.parse(storedRoute) : null;
-    });
-    const { id } = usePage().props;
+    const [itinerary, setItinerary] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchItinerary() {
+            try {
+                const response = await fetch(
+                    `/trippy/public/api/detail-perjalanan/${id}`
+                );
+                if (!response.ok) {
+                    throw new Error("Gagal mengambil data itinerary");
+                }
+                const data = await response.json();
+                setItinerary(data.itinerary);
+                console.log(data.itinerary);
+            } catch (error) {
+                console.error("Error fetching itinerary:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchItinerary();
+    }, [id]);
+
     const handleHapus = async (id) => {
         if (confirm("Apakah Anda yakin ingin menghapus perjalanan ini?")) {
             try {
@@ -29,10 +50,11 @@ export default function DetailPerjalanan({}) {
             }
         }
     };
-
+  
     useEffect(() => {
+        if (!itinerary || !itinerary.pois) return;
+
         try {
-            // Inisialisasi Mapbox
             mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
             mapRef.current = new mapboxgl.Map({
@@ -43,57 +65,70 @@ export default function DetailPerjalanan({}) {
             });
 
             mapRef.current.on("load", () => {
-                console.log("Peta berhasil dimuat.");
-                if (routeData?.optimizedRoute?.length > 0) {
-                    const coordinates = routeData.optimizedRoute;
+                const coordinates = itinerary.pois.map((poi) => [
+                    poi.longitude,
+                    poi.latitude,
+                ]);
 
-                    // Tambahkan marker dengan nomor urutan
-                    coordinates.forEach((coordinate, index) => {
-                        const tempat = routeData.tempatKunjunganList[index];
-                        if (tempat) {
-                            const markerElement = document.createElement("div");
-                            markerElement.className = "custom-marker";
-                            markerElement.innerHTML = index + 1;
+                coordinates.forEach((coordinate, index) => {
+                    const tempat = itinerary.pois[index];
+                    if (tempat) {
+                        const markerElement = document.createElement("div");
+                        markerElement.className = "custom-marker";
+                        markerElement.innerHTML = index + 1;
 
-                            new mapboxgl.Marker(markerElement)
-                                .setLngLat(coordinate)
-                                .setPopup(
-                                    new mapboxgl.Popup().setHTML(
-                                        `<h3>${tempat.nama}</h3><p>${tempat.alamat}</p>`
-                                    )
+                        new mapboxgl.Marker(markerElement)
+                            .setLngLat(coordinate)
+                            .setPopup(
+                                new mapboxgl.Popup().setHTML(
+                                    `<h3>${tempat.name}</h3><p>${tempat.address}</p>`
                                 )
-                                .addTo(mapRef.current);
-                        }
-                    });
+                            )
+                            .addTo(mapRef.current);
+                    }
+                });
 
-                    // Hitung bounds berdasarkan semua koordinat
-                    const bounds = coordinates.reduce(
-                        (bounds, coord) => bounds.extend(coord),
-                        new mapboxgl.LngLatBounds(
-                            coordinates[0],
-                            coordinates[0]
-                        )
-                    );
+                const bounds = coordinates.reduce(
+                    (bounds, coord) => bounds.extend(coord),
+                    new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
+                );
 
-                    // Terapkan fitBounds untuk animasi zoom dinamis
-                    mapRef.current.fitBounds(bounds, {
-                        padding: 50, // Tambahkan padding di sekitar bounds
-                        maxZoom: 15, // Maksimal zoom level
-                        duration: 2000, // Durasi animasi dalam milidetik
-                    });
-                }
+                mapRef.current.fitBounds(bounds, {
+                    padding: 50,
+                    maxZoom: 15,
+                    duration: 2000,
+                });
             });
         } catch (error) {
             console.error("Error initializing Mapbox:", error);
         }
 
-        // Cleanup saat komponen dilepas
         return () => {
             if (mapRef.current) {
                 mapRef.current.remove();
             }
         };
-    }, [routeData]);
+    }, [itinerary]);
+
+    if (loading) {
+        return (
+            <AuthenticatedLayout>
+                <div className="text-center py-8">
+                    Memuat data perjalanan...
+                </div>
+            </AuthenticatedLayout>
+        );
+    }
+
+    if (!itinerary) {
+        return (
+            <AuthenticatedLayout>
+                <div className="text-center py-8">
+                    Perjalanan tidak ditemukan.
+                </div>
+            </AuthenticatedLayout>
+        );
+    }
 
     return (
         <AuthenticatedLayout
@@ -109,27 +144,25 @@ export default function DetailPerjalanan({}) {
             </div>
             <div className="px-6 py-8">
                 <h1 className="text-4xl font-bold text-gray-800 mb-8">
-                    Detail Perjalananmu
+                    {itinerary.itinerary_name}
                 </h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Bagian Kiri */}
                     <div className="h-[500px] overflow-y-auto">
                         <h3 className="text-lg font-medium text-gray-700 mb-4">
                             Tempat Kunjungan
                         </h3>
                         <div className="flex flex-col gap-4">
-                            {routeData?.tempatKunjunganList?.map(
-                                (tempat, index) => (
-                                    <TempatKunjunganCard
-                                        key={index}
-                                        tempatKunjungan={tempat}
-                                    />
-                                )
-                            )}
+                            {itinerary.pois.map((tempat, index) => (
+                                <TempatKunjunganCard
+                                    key={index}
+                                    tempatKunjungan={{
+                                        nama: tempat.name,
+                                        alamat: tempat.address,
+                                    }}
+                                />
+                            ))}
                         </div>
                     </div>
-
-                    {/* Bagian Kanan (Map) */}
                     <div>
                         <div
                             ref={mapContainerRef}

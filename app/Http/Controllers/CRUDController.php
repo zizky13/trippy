@@ -60,7 +60,9 @@ class CRUDController extends Controller
             return response()->json(['error' => 'Itinerary not found'], 404);
         }
 
-        return response()->json(['itinerary' => $itinerary], 200);
+        return response()->json([
+            'itinerary' => $itinerary
+        ], 200);
     }
 
     public function getAll()
