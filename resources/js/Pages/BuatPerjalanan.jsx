@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { Head } from "@inertiajs/react";
 import axios from "axios";
 
-export default function BuatPerjalanan() {
+export default function BuatPerjalanan({ auth }) {
     const [tempatKunjunganList, setTempatKunjunganList] = useState([]);
     const [koordinatList, setKoordinatList] = useState();
     const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +48,7 @@ export default function BuatPerjalanan() {
     const handleKonfirmasi = async () => {
         setIsLoading(true);
         try {
-            // Memanggil API untuk mendapatkan optimized route
+            // Panggil API untuk mendapatkan indeks optimized route
             const optimizeResponse = await axios.post("generateroute", {
                 coordinates: koordinatList.coordinates,
             });
@@ -56,20 +56,19 @@ export default function BuatPerjalanan() {
             const optimizedRouteIndexes =
                 optimizeResponse.data.optimized_route.route;
 
-            // Urutkan daftar tempat kunjungan berdasarkan indeks optimized
-            const sortedTempatKunjunganList = optimizedRouteIndexes.map(
-                (index) => tempatKunjunganList[index]
-            );
+            // Urutkan koordinat dan tempat kunjungan menggunakan indeks optimized
+            const sortedCoordinates = [];
+            const sortedTempatKunjunganList = [];
 
-            // Urutkan koordinat berdasarkan indeks optimized
-            const sortedCoordinates = optimizedRouteIndexes.map(
-                (index) => koordinatList.coordinates[index]
-            );
+            optimizedRouteIndexes.forEach((index) => {
+                sortedCoordinates.push(koordinatList.coordinates[index]);
+                sortedTempatKunjunganList.push(tempatKunjunganList[index]);
+            });
 
             // Kirim data yang sudah diurutkan ke backend
             const createResponse = await axios.post("create-itinerary", {
                 itineraryName: itineraryName,
-                userId: 1, // Ganti dengan ID pengguna
+                userId: 1, // Ganti dengan ID pengguna (jika diperlukan)
                 optimizedRoute: sortedCoordinates,
                 tempatKunjunganList: sortedTempatKunjunganList,
             });

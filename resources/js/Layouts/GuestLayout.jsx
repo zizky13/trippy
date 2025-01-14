@@ -14,7 +14,7 @@ export default function GuestLayout({ children, pagesName }) {
                 <div className="absolute inset-0 bg-black opacity-30"></div>
                 <div className="relative z-10 flex h-full flex-col items-start justify-between p-10 text-white">
                     <h1 className="text-5xl font-nunito font-semibold">
-                        Trippy
+                        <a href="/trippy/public/">Trippy</a>
                     </h1>
                     <div className="flex w-full justify-between items-end p-3">
                         <p className="text-xl font-nunito font-medium">

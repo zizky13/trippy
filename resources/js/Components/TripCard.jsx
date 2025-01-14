@@ -6,10 +6,9 @@ export default function TripCard({
     className = "",
 }) {
     return (
-        // Di bawah pake route("link"), link dari props
         <Link
             href={link}
-            className={`my-10 mx-7 inline-block relative w-full h-32 overflow-hidden rounded-lg shadow-lg  ${className} lg:w-5/12`}
+            className={`my-10 mx-7 inline-block relative w-full h-32 overflow-hidden rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105 ${className} lg:w-5/12`}
         >
             <img
                 src="images/bg-card.png" // Ganti dengan path gambar Anda
