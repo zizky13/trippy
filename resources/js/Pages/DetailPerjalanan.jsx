@@ -17,7 +17,7 @@ export default function DetailPerjalanan({ id }) {
         async function fetchItinerary() {
             try {
                 const response = await fetch(
-                    `/trippy/public/api/detail-perjalanan/${id}`
+                    `/public/api/detail-perjalanan/${id}`
                 );
                 if (!response.ok) {
                     throw new Error("Gagal mengambil data itinerary");
