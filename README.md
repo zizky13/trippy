@@ -1,3 +1,6 @@
+# It's now live on:
+> http://trippy.my.id/
+
 ## Requirements:
 - Node version 20 or newer
 - Composer version 2.8 or newer
